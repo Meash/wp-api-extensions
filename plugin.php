@@ -22,15 +22,16 @@ class RESTAPIModifiedContent_API_Site {
 		register_rest_route($this->BASE_URL, '/posts_and_pages/(?P<last_modified_gmt>.*)', array(
 			'methods' => WP_REST_Server::READABLE,
 			'callback' => array($this, 'get_modified_posts_and_pages'),
-			'args' => array(
-				'last_modified_gmt',
-			),
 		));
 	}
 
 	public function get_modified_posts_and_pages($data) {
 		$last_modified_gmt = $data['last_modified_gmt'];
-		$this->validate_datetime($last_modified_gmt);
+		if (!$this->validate_datetime($last_modified_gmt)) {
+			return new WP_Error("wp-api-modified-content_datetime_invalid",
+				"Invalid datetime '$last_modified_gmt'",
+				array('status' => 400));
+		}
 		$args = array(
 			'date_query' => array(
 				array(
