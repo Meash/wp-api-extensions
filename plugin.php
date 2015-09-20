@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP API Modified Content
  * Description: Retrieve only modified content, given the modification datetime
- * Version: 0.1
+ * Version: 0.2
  * Created: 19.09.2015 23:08
  * Author: Martin Schrimpf
  * Author URI: https://github.com/Meash
@@ -12,13 +12,14 @@
 
 add_action('rest_api_init', function () {
 	$endpoint = new RESTAPIModifiedContent_API_Site();
-	$endpoint->register();
+	$endpoint->register_routes();
 });
 
 class RESTAPIModifiedContent_API_Site {
 	private $BASE_URL = 'modified_content';
+	private $datetime_format = 'Y-m-d G:i:s';
 
-	public function register() {
+	public function register_routes() {
 		register_rest_route($this->BASE_URL, '/posts_and_pages/(?P<last_modified_gmt>.*)', array(
 			'methods' => WP_REST_Server::READABLE,
 			'callback' => array($this, 'get_modified_posts_and_pages'),
@@ -29,20 +30,20 @@ class RESTAPIModifiedContent_API_Site {
 		$last_modified_gmt = $data['last_modified_gmt'];
 		if (!$this->validate_datetime($last_modified_gmt)) {
 			return new WP_Error("wp-api-modified-content_datetime_invalid",
-				"Invalid datetime '$last_modified_gmt'",
+				"Invalid datetime '$last_modified_gmt' - expected format is $this->datetime_format",
 				array('status' => 400));
 		}
-		$args = array(
+
+		$query_args = array(
+			'post_type' => array('post', 'page'),
 			'date_query' => array(
-				array(
-					'column' => 'post_modified_gmt',
-					'after' => $last_modified_gmt,
-				),
+				'column' => 'post_modified_gmt',
+				'after' => $last_modified_gmt,
 			),
-			'posts_per_page' => -1,
+			'posts_per_page' => -1 /* show all */,
 		);
 		$query = new WP_Query();
-		$query_result = $query->query($args);
+		$query_result = $query->query($query_args);
 
 		$result = array();
 		foreach ($query_result as $item) {
@@ -64,6 +65,6 @@ class RESTAPIModifiedContent_API_Site {
 	}
 
 	private function validate_datetime($arg) {
-		return DateTime::createFromFormat('Y-m-d G:i:s', $arg) !== false;
+		return DateTime::createFromFormat($this->datetime_format, $arg) !== false;
 	}
 }
