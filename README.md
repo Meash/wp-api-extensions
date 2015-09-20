@@ -6,7 +6,8 @@ Go to Plugins > Add New > Upload and upload this repository's zip
 
 ## Datetime Parameter
 The last part of any url is the GMT datetime after which all modifications are retrieved.
-The format is as follows: `yyyy-MM-dd HH:mm:ss`, for instance `2015-09-20 15:37:25`.
+The expected format is `Y-m-d G:i:s` (see the [PHP Documentation](http://php.net/manual/en/function.date.php)),
+for instance `2015-09-20 15:37:25`.
 
 ## Endpoints
-`modified_content/posts_and_pages/<datetime>` gives you a list of modified posts and pages
+`modified_content/posts_and_pages/<datetime>` gives you a list of all modified posts and pages
