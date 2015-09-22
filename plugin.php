@@ -12,11 +12,15 @@ require_once __DIR__ . '/endpoints/RestApi_ModifiedContent.php';
 require_once __DIR__ . '/endpoints/RestApi_WpmlLanguages.php';
 require_once __DIR__ . '/endpoints/RestApi_Multisites.php';
 
+const API_VERSION = 0;
+const ROOT_URL = 'extensions';
+
 add_action('rest_api_init', function () {
+	$base_url = ROOT_URL . '/v' . API_VERSION;
 	$endpoints = [
-		new RestApi_ModifiedContent(),
-		new RestApi_WpmlLanguages(),
-		new RestApi_Multisites()
+		new RestApi_ModifiedContent($base_url),
+		new RestApi_WpmlLanguages($base_url),
+		new RestApi_Multisites($base_url)
 	];
 	foreach ($endpoints as $endpoint) {
 		$endpoint->register_routes();

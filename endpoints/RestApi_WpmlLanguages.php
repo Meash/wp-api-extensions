@@ -1,17 +1,26 @@
 <?php
 
+/**
+ * Retrieve the active WPML languages of a site
+ */
 class RestApi_WpmlLanguages {
-	private $URL = 'languages';
+	const URL = 'languages';
+	private $baseUrl;
+
+	public function __construct($pluginBaseUrl) {
+		$this->baseUrl = $pluginBaseUrl . '/' . self::URL;
+	}
+
 
 	public function register_routes() {
-		register_rest_route($this->URL, '/wpml', array(
+		register_rest_route($this->baseUrl, '/wpml', array(
 			'methods' => WP_REST_Server::READABLE,
 			'callback' => array($this, 'get_wpml_languages'),
 		));
 	}
 
 	public function get_wpml_languages() {
-		$languages = icl_get_languages('skip_missing=0&orderby=KEY&order=DIR&link_empty_to=str');
+		$languages = apply_filters('wpml_active_languages', NULL, '');
 
 		$result = array();
 		foreach ($languages as $item) {

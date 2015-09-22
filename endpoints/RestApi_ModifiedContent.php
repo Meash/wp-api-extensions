@@ -4,11 +4,18 @@
  * Retrieve only content that has been modified since a given datetime
  */
 class RestApi_ModifiedContent {
-	private $BASE_URL = 'modified_content';
+	const URL = 'modified_content';
 	private $datetime_format = 'Y-m-d G:i:s';
 
+	private $baseUrl;
+
+	public function __construct($pluginBaseUrl) {
+		$this->baseUrl = $pluginBaseUrl . '/' . self::URL;
+	}
+
+
 	public function register_routes() {
-		register_rest_route($this->BASE_URL, '/posts_and_pages/(?P<last_modified_gmt>.*)', array(
+		register_rest_route($this->baseUrl, '/posts_and_pages/(?P<last_modified_gmt>.*)', array(
 			'methods' => WP_REST_Server::READABLE,
 			'callback' => array($this, 'get_modified_posts_and_pages'),
 		));

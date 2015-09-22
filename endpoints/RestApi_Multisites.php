@@ -4,17 +4,23 @@
  * Retrieve the multisites defined in this network
  */
 class RestApi_Multisites {
-	private $URL = 'multisites';
+	const URL = 'multisites';
+	private $baseUrl;
+
+	public function __construct($pluginBaseUrl) {
+		$this->baseUrl = $pluginBaseUrl . '/' . self::URL;
+	}
+
 
 	public function register_routes() {
-		register_rest_route($this->URL, '/', array(
+		register_rest_route($this->baseUrl, '/', array(
 			'methods' => WP_REST_Server::READABLE,
 			'callback' => array($this, 'get_multisites'),
 		));
 	}
 
 	public function get_multisites() {
-		$multisites = get_blog_list(0, 'all');
+		$multisites = wp_get_sites();
 
 		$result = array();
 		foreach ($multisites as $item) {
