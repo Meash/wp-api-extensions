@@ -4,13 +4,14 @@
  * Retrieve only content that has been modified since a given datetime
  */
 class RestApi_ModifiedContent {
+	const API_VERSION = 0;
 	const URL = 'modified_content';
 	private $datetime_format = 'Y-m-d G:i:s';
 
 	private $baseUrl;
 
 	public function __construct($pluginBaseUrl) {
-		$this->baseUrl = $pluginBaseUrl . '/' . self::URL;
+		$this->baseUrl = $pluginBaseUrl . '/v' . self::API_VERSION . '/' . self::URL;
 	}
 
 

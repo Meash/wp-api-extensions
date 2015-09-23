@@ -4,11 +4,12 @@
  * Retrieve the active WPML languages of a site
  */
 class RestApi_WpmlLanguages {
+	const API_VERSION = 0;
 	const URL = 'languages';
 	private $baseUrl;
 
 	public function __construct($pluginBaseUrl) {
-		$this->baseUrl = $pluginBaseUrl . '/' . self::URL;
+		$this->baseUrl = $pluginBaseUrl . '/v' . self::API_VERSION . '/' . self::URL;
 	}
 
 
