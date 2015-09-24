@@ -1,29 +1,28 @@
 <?php
 
+require_once __DIR__ . '/RestApi_ExtensionBase.php';
+
 /**
  * Retrieve the multisites defined in this network
  */
-class RestApi_Multisites {
-	const API_VERSION = 0;
+class RestApi_Multisites extends RestApi_ExtensionBase {
 	const URL = 'multisites';
-	private $baseUrl;
 
 	public function __construct($pluginBaseUrl) {
-		$this->baseUrl = $pluginBaseUrl . '/v' . self::API_VERSION . '/' . self::URL;
+		parent::__construct($pluginBaseUrl, self::URL);
 	}
 
 
 	public function register_routes() {
-		register_rest_route($this->baseUrl, '/', array(
-			'methods' => WP_REST_Server::READABLE,
-			'callback' => array($this, 'get_multisites'),
-		));
+		parent::register_route('/', [
+			'callback' => [$this, 'get_multisites']
+		]);
 	}
 
 	public function get_multisites() {
 		$multisites = wp_get_sites();
 
-		$result = array();
+		$result = [];
 		foreach ($multisites as $item) {
 			$result[] = $this->prepare_item($item);
 		}

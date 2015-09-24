@@ -1,25 +1,23 @@
 <?php
 
+require_once __DIR__ . '/RestApi_ExtensionBase.php';
+
 /**
  * Retrieve only content that has been modified since a given datetime
  */
-class RestApi_ModifiedContent {
-	const API_VERSION = 0;
+class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 	const URL = 'modified_content';
 	private $datetime_format = 'Y-m-d G:i:s';
 
-	private $baseUrl;
-
 	public function __construct($pluginBaseUrl) {
-		$this->baseUrl = $pluginBaseUrl . '/v' . self::API_VERSION . '/' . self::URL;
+		parent::__construct($pluginBaseUrl, self::URL);
 	}
 
 
 	public function register_routes() {
-		register_rest_route($this->baseUrl, '/posts_and_pages/(?P<last_modified_gmt>.*)', array(
-			'methods' => WP_REST_Server::READABLE,
-			'callback' => array($this, 'get_modified_posts_and_pages'),
-		));
+		parent::register_route('/posts_and_pages/(?P<last_modified_gmt>.*)', [
+			'callback' => [$this, 'get_modified_posts_and_pages']
+		]);
 	}
 
 	public function get_modified_posts_and_pages($data) {
@@ -27,21 +25,21 @@ class RestApi_ModifiedContent {
 		if (!$this->validate_datetime($last_modified_gmt)) {
 			return new WP_Error("wp-api-modified-content_datetime_invalid",
 				"Invalid datetime '$last_modified_gmt' - expected format is $this->datetime_format",
-				array('status' => 400));
+				['status' => 400]);
 		}
 
-		$query_args = array(
-			'post_type' => array('post', 'page'),
-			'date_query' => array(
+		$query_args = [
+			'post_type' => ['post', 'page'],
+			'date_query' => [
 				'column' => 'post_modified_gmt',
 				'after' => $last_modified_gmt,
-			),
+			],
 			'posts_per_page' => -1 /* show all */,
-		);
+		];
 		$query = new WP_Query();
 		$query_result = $query->query($query_args);
 
-		$result = array();
+		$result = [];
 		foreach ($query_result as $item) {
 			$result[] = $this->prepare_item($item);
 		}

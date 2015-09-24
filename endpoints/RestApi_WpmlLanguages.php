@@ -1,29 +1,28 @@
 <?php
 
+require_once __DIR__ . '/RestApi_ExtensionBase.php';
+
 /**
  * Retrieve the active WPML languages of a site
  */
-class RestApi_WpmlLanguages {
-	const API_VERSION = 0;
+class RestApi_WpmlLanguages extends RestApi_ExtensionBase {
 	const URL = 'languages';
-	private $baseUrl;
 
 	public function __construct($pluginBaseUrl) {
-		$this->baseUrl = $pluginBaseUrl . '/v' . self::API_VERSION . '/' . self::URL;
+		parent::__construct($pluginBaseUrl, self::URL);
 	}
 
 
 	public function register_routes() {
-		register_rest_route($this->baseUrl, '/wpml', array(
-			'methods' => WP_REST_Server::READABLE,
-			'callback' => array($this, 'get_wpml_languages'),
-		));
+		parent::register_route('/wpml', [
+			'callback' => [$this, 'get_wpml_languages']
+		]);
 	}
 
 	public function get_wpml_languages() {
 		$languages = apply_filters('wpml_active_languages', NULL, '');
 
-		$result = array();
+		$result = [];
 		foreach ($languages as $item) {
 			$result[] = $this->prepare_item($item);
 		}
