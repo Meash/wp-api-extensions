@@ -1,5 +1,6 @@
 # WP API Extensions
 Collection of extensions to the Wordpress REST API (WP API)
+under development as part of a [project for refugees in Germany](http://vmkrcmar21.informatik.tu-muenchen.de/wordpress/)
 
 The following routes are added:
 * `extensions/v0/modified_content/posts_and_pages/<datetime>` returns all modified posts and pages
