@@ -7,26 +7,34 @@ require_once __DIR__ . '/RestApi_ExtensionBase.php';
  */
 class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 	const URL = 'modified_content';
-	private $datetime_format = 'Y-m-d G:i:s';
+	private $datetime_input_format = DateTime::ATOM;
+	private $datetime_query_format = DateTime::ATOM;
+	private $datetime_zone_gmt;
 
 	public function __construct($pluginBaseUrl) {
 		parent::__construct($pluginBaseUrl, self::URL);
+		$this->datetime_zone_gmt = new DateTimeZone('GMT');
 	}
 
 
 	public function register_routes() {
-		parent::register_route('/posts_and_pages/(?P<last_modified_gmt>.*)', [
-			'callback' => [$this, 'get_modified_posts_and_pages']
+		parent::register_route('/posts_and_pages/', [
+			'callback' => [$this, 'get_modified_posts_and_pages'],
+			'args' => [
+				'since' => [
+					'required' => true,
+					'validate_callback' => [$this, 'validate_datetime']
+				]
+			]
 		]);
 	}
 
-	public function get_modified_posts_and_pages($data) {
-		$last_modified_gmt = $data['last_modified_gmt'];
-		if (!$this->validate_datetime($last_modified_gmt)) {
-			return new WP_Error("wp-api-modified-content_datetime_invalid",
-				"Invalid datetime '$last_modified_gmt' - expected format is $this->datetime_format",
-				['status' => 400]);
-		}
+	public function get_modified_posts_and_pages(WP_REST_Request $request) {
+		$since = $request->get_param('since');
+		$last_modified_gmt = $this
+			->make_datetime($since)
+			->setTimezone($this->datetime_zone_gmt)
+			->format($this->datetime_query_format);
 
 		$query_args = [
 			'post_type' => ['post', 'page'],
@@ -58,7 +66,11 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 		];
 	}
 
-	private function validate_datetime($arg) {
-		return DateTime::createFromFormat($this->datetime_format, $arg) !== false;
+	public function validate_datetime($arg) {
+		return $this->make_datetime($arg) !== false;
+	}
+
+	private function make_datetime($arg) {
+		return DateTime::createFromFormat($this->datetime_input_format, $arg);
 	}
 }
