@@ -18,18 +18,32 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 
 
 	public function register_routes() {
-		parent::register_route('/posts_and_pages/', [
-			'callback' => [$this, 'get_modified_posts_and_pages'],
-			'args' => [
-				'since' => [
-					'required' => true,
-					'validate_callback' => [$this, 'validate_datetime']
-				]
+		$args = [
+			'since' => [
+				'required' => true,
+				'validate_callback' => [$this, 'validate_datetime']
 			]
+		];
+
+		parent::register_route('/pages/', [
+			'callback' => [$this, 'get_modified_pages'],
+			'args' => $args
+		]);
+		parent::register_route('/posts/', [
+			'callback' => [$this, 'get_modified_posts'],
+			'args' => $args
 		]);
 	}
 
-	public function get_modified_posts_and_pages(WP_REST_Request $request) {
+	public function get_modified_pages(WP_REST_Request $request) {
+		return $this->get_modified_posts_by_type("page", $request);
+	}
+
+	public function get_modified_posts(WP_REST_Request $request) {
+		return $this->get_modified_posts_by_type("post", $request);
+	}
+
+	private function get_modified_posts_by_type($type, WP_REST_Request $request) {
 		$since = $request->get_param('since');
 		$last_modified_gmt = $this
 			->make_datetime($since)
@@ -37,8 +51,7 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 			->format($this->datetime_query_format);
 
 		$query_args = [
-			/* posts and pages */
-			'post_type' => ['post', 'page'],
+			'post_type' => $type,
 			/* only after datetime */
 			'date_query' => [
 				'column' => 'post_modified_gmt',
@@ -47,6 +60,8 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 			/* keep order */
 			'orderby' => 'menu_order',
 			'order' => 'ASC',
+			/* also show deleted items */
+			'post_status' => ['publish', 'trash'],
 			/* no pagination, show all */
 			'posts_per_page' => -1,
 		];
@@ -66,6 +81,7 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 			'id' => $post->ID,
 			'title' => $post->post_title,
 			'type' => $post->post_type,
+			'status' => $post->post_status,
 			'modified_gmt' => $post->post_modified_gmt,
 			'excerpt' => $this->prepare_excerpt($post),
 			'content' => $post->post_content,
