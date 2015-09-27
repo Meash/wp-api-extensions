@@ -37,12 +37,18 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 			->format($this->datetime_query_format);
 
 		$query_args = [
+			/* posts and pages */
 			'post_type' => ['post', 'page'],
+			/* only after datetime */
 			'date_query' => [
 				'column' => 'post_modified_gmt',
 				'after' => $last_modified_gmt,
 			],
-			'posts_per_page' => -1 /* show all */,
+			/* keep order */
+			'orderby' => 'menu_order',
+			'order' => 'ASC',
+			/* no pagination, show all */
+			'posts_per_page' => -1,
 		];
 		$query = new WP_Query();
 		$query_result = $query->query($query_args);
@@ -54,15 +60,16 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 		return $result;
 	}
 
-	private function prepare_item($item) {
+	private function prepare_item($post) {
 		return [
-			'id' => $item->ID,
-			'title' => $item->post_title,
-			'type' => $item->post_type,
-			'modified_gmt' => $item->post_modified_gmt,
-			'excerpt' => $item->post_content ?: wp_trim_excerpt($item->post_content),
-			'content' => $item->post_content,
-			'parent' => $item->post_parent
+			'id' => $post->ID,
+			'title' => $post->post_title,
+			'type' => $post->post_type,
+			'modified_gmt' => $post->post_modified_gmt,
+			'excerpt' => $post->post_content ?: wp_trim_excerpt($post->post_content),
+			'content' => $post->post_content,
+			'parent' => $post->post_parent,
+			'order' => $post->menu_order
 		];
 	}
 
