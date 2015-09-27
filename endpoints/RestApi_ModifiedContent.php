@@ -61,12 +61,13 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 	}
 
 	private function prepare_item($post) {
+		setup_postdata($post);
 		return [
 			'id' => $post->ID,
 			'title' => $post->post_title,
 			'type' => $post->post_type,
 			'modified_gmt' => $post->post_modified_gmt,
-			'excerpt' => $post->post_content ?: wp_trim_excerpt($post->post_content),
+			'excerpt' => $this->prepare_excerpt($post),
 			'content' => $post->post_content,
 			'parent' => $post->post_parent,
 			'order' => $post->menu_order
@@ -79,5 +80,10 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 
 	private function make_datetime($arg) {
 		return DateTime::createFromFormat($this->datetime_input_format, $arg);
+	}
+
+	private function prepare_excerpt($post) {
+		return $post->post_excerpt ?:
+			apply_filters('the_excerpt', apply_filters('get_the_excerpt', $post->post_excerpt));
 	}
 }
