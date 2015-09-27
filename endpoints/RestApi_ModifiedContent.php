@@ -11,8 +11,8 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 	private $datetime_query_format = DateTime::ATOM;
 	private $datetime_zone_gmt;
 
-	public function __construct($pluginBaseUrl) {
-		parent::__construct($pluginBaseUrl, self::URL);
+	public function __construct($namespace) {
+		parent::__construct($namespace, self::URL);
 		$this->datetime_zone_gmt = new DateTimeZone('GMT');
 	}
 

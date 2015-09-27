@@ -8,8 +8,8 @@ require_once __DIR__ . '/RestApi_ExtensionBase.php';
 class RestApi_Multisites extends RestApi_ExtensionBase {
 	const URL = 'multisites';
 
-	public function __construct($pluginBaseUrl) {
-		parent::__construct($pluginBaseUrl, self::URL);
+	public function __construct($namespace) {
+		parent::__construct($namespace, self::URL);
 	}
 
 
