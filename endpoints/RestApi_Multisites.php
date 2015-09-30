@@ -8,6 +8,9 @@ require_once __DIR__ . '/RestApi_ExtensionBase.php';
 class RestApi_Multisites extends RestApi_ExtensionBase {
 	const URL = 'multisites';
 
+	const EXCLUDED_SITE_IDS = [1];
+	const GLOBAL_SITE_IDS = [5];
+
 	public function __construct($namespace) {
 		parent::__construct($namespace, self::URL);
 	}
@@ -23,20 +26,25 @@ class RestApi_Multisites extends RestApi_ExtensionBase {
 		$multisites = wp_get_sites();
 
 		$result = [];
-		foreach ($multisites as $item) {
-			$result[] = $this->prepare_item($item);
+		foreach ($multisites as $blog) {
+			if (in_array($blog['blog_id'], self::EXCLUDED_SITE_IDS)) {
+				continue;
+			}
+			$result[] = $this->prepare_item($blog);
 		}
 		return $result;
 	}
 
 	private function prepare_item($blog) {
 		$details = get_blog_details($blog);
+		$id = $blog['blog_id'];
 		return [
-			'id' => $blog['blog_id'],
+			'id' => $id,
 			'name' => $details->blogname,
-			'icon' => $this->get_icon($blog['blog_id']),
+			'icon' => $this->get_icon($id),
 			'path' => $blog['path'],
-			'description' => get_bloginfo($blog)
+			'description' => get_bloginfo($blog),
+			'global' => in_array($id, self::GLOBAL_SITE_IDS)
 		];
 	}
 

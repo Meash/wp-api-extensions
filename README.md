@@ -13,6 +13,8 @@ The following routes are added:
    for instance `2015-09-20T15:37:25Z`)
 * `extensions/v0/languages/wpml` returns the languages available through the WPML plugin
 * `extensions/v0/multisites/` returns the multisites of the network
+   * exclude sites by adding their id to the exclusion list
+   * mark sites as `global` by adding their id to the global list
 
 ## Installation
 Go to Plugins > Add New > Upload and upload this repository's zip
