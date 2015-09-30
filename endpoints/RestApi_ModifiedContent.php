@@ -1,12 +1,14 @@
 <?php
 
 require_once __DIR__ . '/RestApi_ExtensionBase.php';
+require_once __DIR__ . '/helper/WpmlHelper.php';
 
 /**
  * Retrieve only content that has been modified since a given datetime
  */
 class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 	const URL = 'modified_content';
+
 	private $datetime_input_format = DateTime::ATOM;
 	private $datetime_query_format = DateTime::ATOM;
 	private $datetime_zone_gmt;
@@ -14,6 +16,7 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 	public function __construct($namespace) {
 		parent::__construct($namespace, self::URL);
 		$this->datetime_zone_gmt = new DateTimeZone('GMT');
+		$this->wpml_helper = new WpmlHelper();
 	}
 
 
@@ -86,7 +89,8 @@ class RestApi_ModifiedContent extends RestApi_ExtensionBase {
 			'excerpt' => $this->prepare_excerpt($post),
 			'content' => $post->post_content,
 			'parent' => $post->post_parent,
-			'order' => $post->menu_order
+			'order' => $post->menu_order,
+			'available_languages' => $this->wpml_helper->get_available_languages($post->ID, $post->post_type)
 		];
 	}
 
